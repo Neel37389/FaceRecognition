@@ -18,10 +18,29 @@ class App extends Component {
     this.state = {
       input: "",
       imageUrl: "",
+      box: {},
     };
     this.onInputChange = this.onInputChange.bind(this);
     this.onButtonSubmit = this.onButtonSubmit.bind(this);
   }
+
+  calculateFaceLocation = (data) => {
+    const clarifaiFace = data.root[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById("inputimage");
+    const width = Number(image.width);
+    const height = Number(image.height);
+    return {
+      leftCol: clarifaiFace.left_col * width,
+      topRow: clarifaiFace.top_row * height,
+      rightCol: width - clarifaiFace.right_col * width,
+      bottomRow: height - clarifaiFace.bottom_row * height,
+    };
+  };
+
+  displayFaceBox = (box) => {
+    this.setState({ box: box });
+    console.log(box);
+  };
 
   onInputChange = (event) => {
     this.setState({ input: event.target.value });
@@ -29,12 +48,13 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    app.models.predict("face-detection", this.state.input).then(
-      (response) => {
-        console.log(response);
-      },
-      function (error) {}
-    );
+    app.models
+      .predict("face-detection", this.state.input)
+      .then((response) =>
+        this.displayFaceBox(this.calculateFaceLocation(response)).catch((err) =>
+          console.log(err)
+        )
+      );
   };
 
   render() {
@@ -56,4 +76,4 @@ class App extends Component {
 
 export default App;
 
-// https://hips.hearstapps.com/hmg-prod/images/gettyimages-1257937597.jpg
+// `
