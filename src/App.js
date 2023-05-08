@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Clarifai from "clarifai";
+// import Clarifai from "clarifai";
 import ParticlesBg from "particles-bg";
 import Navigation from "./Components/Navigation/Navigation";
 import Logo from "./Components/Logo/Logo";
@@ -8,9 +8,42 @@ import ImageLinkForm from "./Components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./Components/FaceRecognition/FaceRecognition";
 import "./App.css";
 
-const app = new Clarifai.App({
-  apiKey: "9c038e21436645ff8ceb3e282df28193",
-});
+const returnClarifaiRequestOptions = (imageURL) => {
+  const PAT = "710dc5651702493aa7091d7ef277172b";
+  const USER_ID = "neel_3738";
+  const APP_ID = "my-first-application";
+  const MODEL_ID = "face-detection";
+  const IMAGE_URL = imageURL;
+
+  const raw = JSON.stringify({
+    user_app_id: {
+      user_id: USER_ID,
+      app_id: APP_ID,
+    },
+    inputs: [
+      {
+        data: {
+          image: {
+            url: IMAGE_URL,
+          },
+        },
+      },
+    ],
+  });
+  const requestOptions = {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      Authorization: "Key " + PAT,
+    },
+    body: raw,
+  };
+  return requestOptions;
+};
+
+// NOTE: MODEL_VERSION_ID is optional, you can also call prediction with the MODEL_ID only
+// https://api.clarifai.com/v2/models/{YOUR_MODEL_ID}/outputs
+// this will default to the latest version_id
 
 class App extends Component {
   constructor() {
@@ -25,7 +58,8 @@ class App extends Component {
   }
 
   calculateFaceLocation = (data) => {
-    const clarifaiFace = data.root[0].data.regions[0].region_info.bounding_box;
+    const clarifaiFace =
+      data.outputs[0].data.regions[0].region_info.bounding_box;
     const image = document.getElementById("inputimage");
     const width = Number(image.width);
     const height = Number(image.height);
@@ -48,10 +82,14 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    app.models
-      .predict("face-detection", this.state.input)
-      .then((response) =>
-        this.displayFaceBox(this.calculateFaceLocation(response)).catch((err) =>
+    const MODEL_ID = "face-detection";
+    fetch(
+      "https://api.clarifai.com/v2/models/" + MODEL_ID + "/outputs",
+      returnClarifaiRequestOptions(this.state.input)
+    )
+      .then((response) => response.json())
+      .then((data) =>
+        this.displayFaceBox(this.calculateFaceLocation(data)).catch((err) =>
           console.log(err)
         )
       );
