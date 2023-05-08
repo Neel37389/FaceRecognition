@@ -68,7 +68,7 @@ class App extends Component {
           onInputChange={this.onInputChange}
           onButtonSubmit={this.onButtonSubmit}
         />
-        <FaceRecognition imageUrl={this.state.imageUrl} />
+        <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl} />
       </div>
     );
   }
@@ -76,4 +76,4 @@ class App extends Component {
 
 export default App;
 
-// `
+// `https://hips.hearstapps.com/hmg-prod/images/gettyimages-1257937597.jpg`
