@@ -2,18 +2,20 @@ import React, { Component } from "react";
 // import Clarifai from "clarifai";
 import ParticlesBg from "particles-bg";
 import Navigation from "./Components/Navigation/Navigation";
+import SignIn from "./Components/SignIn/SignIn";
+import Register from "./Components/Register/Register";
 import Logo from "./Components/Logo/Logo";
 import Rank from "./Components/Rank/Rank";
 import ImageLinkForm from "./Components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./Components/FaceRecognition/FaceRecognition";
 import "./App.css";
 
-const returnClarifaiRequestOptions = (imageURL) => {
+const returnClarifaiRequestOptions = (imageUrl) => {
   const PAT = "710dc5651702493aa7091d7ef277172b";
   const USER_ID = "neel_3738";
   const APP_ID = "my-first-application";
   const MODEL_ID = "face-detection";
-  const IMAGE_URL = imageURL;
+  const IMAGE_URL = imageUrl;
 
   const raw = JSON.stringify({
     user_app_id: {
@@ -52,6 +54,8 @@ class App extends Component {
       input: "",
       imageUrl: "",
       box: {},
+      route: "signin",
+      isSignedIn: false,
     };
     this.onInputChange = this.onInputChange.bind(this);
     this.onButtonSubmit = this.onButtonSubmit.bind(this);
@@ -73,7 +77,6 @@ class App extends Component {
 
   displayFaceBox = (box) => {
     this.setState({ box: box });
-    console.log(box);
   };
 
   onInputChange = (event) => {
@@ -83,30 +86,49 @@ class App extends Component {
   onButtonSubmit = () => {
     this.setState({ imageUrl: this.state.input });
     const MODEL_ID = "face-detection";
+    const options = returnClarifaiRequestOptions(this.state.input);
     fetch(
       "https://api.clarifai.com/v2/models/" + MODEL_ID + "/outputs",
-      returnClarifaiRequestOptions(this.state.input)
+      options
     )
       .then((response) => response.json())
-      .then((data) =>
-        this.displayFaceBox(this.calculateFaceLocation(data)).catch((err) =>
-          console.log(err)
-        )
-      );
+      .then((data) => this.displayFaceBox(this.calculateFaceLocation(data)))
+      .catch((err) => console.log(err));
+  };
+
+  onRouteChange = (route) => {
+    if (route === "signout") {
+      this.setState({ isSignedIn: false });
+    } else if (route === "home") {
+      this.setState({ isSignedIn: true });
+    }
+    this.setState({ route: route });
   };
 
   render() {
+    const { isSignedIn, imageUrl, route, box } = this.state;
     return (
       <div className="App">
         <ParticlesBg color="#FFFFFF" type="cobweb" bg={true} />
-        <Navigation />
-        <Logo />
-        <Rank />
-        <ImageLinkForm
-          onInputChange={this.onInputChange}
-          onButtonSubmit={this.onButtonSubmit}
+        <Navigation
+          isSignedIn={isSignedIn}
+          onRouteChange={this.onRouteChange}
         />
-        <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl} />
+        {route === "home" ? (
+          <div>
+            <Logo />
+            <Rank />
+            <ImageLinkForm
+              onInputChange={this.onInputChange}
+              onButtonSubmit={this.onButtonSubmit}
+            />
+            <FaceRecognition box={box} imageUrl={imageUrl} />
+          </div>
+        ) : route === "signin" ? (
+          <SignIn onRouteChange={this.onRouteChange} />
+        ) : (
+          <Register onRouteChange={this.onRouteChange} />
+        )}
       </div>
     );
   }
@@ -115,3 +137,5 @@ class App extends Component {
 export default App;
 
 // `https://hips.hearstapps.com/hmg-prod/images/gettyimages-1257937597.jpg`
+
+// https://ychef.files.bbci.co.uk/1280x720/p0cr3znc.jpg
