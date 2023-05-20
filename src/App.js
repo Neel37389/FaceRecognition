@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-// import Clarifai from "clarifai";
 import ParticlesBg from "particles-bg";
 import Navigation from "./Components/Navigation/Navigation";
 import SignIn from "./Components/SignIn/SignIn";
@@ -139,3 +138,5 @@ export default App;
 // `https://hips.hearstapps.com/hmg-prod/images/gettyimages-1257937597.jpg`
 
 // https://ychef.files.bbci.co.uk/1280x720/p0cr3znc.jpg
+
+//https://www.manicare.com.au/on/demandware.static/-/Library-Sites-mcp-shared-library/default/dw45e32389/manicare/blog/manicare-blog-face-shapes-inlaid-2.jpg
